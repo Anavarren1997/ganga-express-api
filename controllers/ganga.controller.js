@@ -1,37 +1,56 @@
-import GangaService from "../services/ganga.service.js";
+import GangaService from '../services/ganga.service.js';
 
-const getAllGangas = (req, res) => {
-  const gangas = GangaService.getAllGangas();
-  res.send("Fetched all gangas");
+const getAllGangas = async (req, res) => {
+  const gangas = await GangaService.getAllGangas();
+  res.send({ status: 'OK', data: gangas });
 };
 
-const getGangaById = (req, res) => {
+const getGangaById = async (req, res) => {
   const { gangaId } = req.params;
-  const ganga = GangaService.getGangaById({ gangaId });
-  res.send(`Fetching ganga: ${gangaId}`);
+  const ganga = await GangaService.getGangaById({ gangaId });
+  res.send({ status: 'OK', data: ganga });
 };
 
-const createGanga = (req, res) => {
-  const newGanga = GangaService.createGanga();
-  res.send("Creating gangas");
-};
-
-const updateGangaById = (req, res) => {
+const updateGangaById = async (req, res) => {
   const { gangaId } = req.params;
-  const updatedGanga = GangaService.updateGangaById({ gangaId });
-  res.send(`Updating ganga: ${gangaId}`);
+  const {
+    name,
+    description,
+    realPrice,
+    buyPrice,
+    salePrice,
+    sold,
+    amazonLink,
+  } = req.body;
+  const updatedGanga = await GangaService.updateGangaById({
+    gangaId,
+    name,
+    description,
+    realPrice,
+    buyPrice,
+    salePrice,
+    sold,
+    amazonLink,
+  });
+  res.send({ status: 'OK', data: updatedGanga });
 };
 
-const deleteGangaById = (req, res) => {
+const deleteGangaById = async (req, res) => {
   const { gangaId } = req.params;
-  const deletedGanga = GangaService.deleteGangaById({ gangaId });
-  res.send(`Deleting ganga with id : ${gangaId}`);
+  const deletedGanga = await GangaService.deleteGangaById({ gangaId });
+  res.send({ status: 'OK', data: deletedGanga });
+};
+
+const createGangasFromCSV = async (req, res) => {
+  const filePath = req.file.path;
+  const gangas = await GangaService.createGangasFromCSV({ filePath });
+  res.send({ status: 'OK', data: gangas });
 };
 
 export default {
   getAllGangas,
   getGangaById,
-  createGanga,
   updateGangaById,
   deleteGangaById,
+  createGangasFromCSV,
 };
