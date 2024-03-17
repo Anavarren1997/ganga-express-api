@@ -1,14 +1,23 @@
+import GangaResponse from '../responses/ganga.response.js';
 import GangaService from '../services/ganga.service.js';
+import { CreatedHttpResponse } from '../utils/httpResponses/created.httpResponse';
+import { SuccessHttpResponse } from '../utils/httpResponses/success.httpResponse';
 
 const getAllGangas = async (req, res) => {
   const gangas = await GangaService.getAllGangas();
-  res.send({ status: 'OK', data: gangas });
+
+  new SuccessHttpResponse(res, {
+    ganga: new GangaResponse(gangas).buildGangaResponse(),
+  }).send();
 };
 
 const getGangaById = async (req, res) => {
   const { gangaId } = req.params;
   const ganga = await GangaService.getGangaById({ gangaId });
-  res.send({ status: 'OK', data: ganga });
+
+  new SuccessHttpResponse(res, {
+    ganga: new GangaResponse(ganga).buildGangaResponse(),
+  }).send();
 };
 
 const updateGangaById = async (req, res) => {
@@ -32,19 +41,28 @@ const updateGangaById = async (req, res) => {
     sold,
     amazonLink,
   });
-  res.send({ status: 'OK', data: updatedGanga });
+
+  new SuccessHttpResponse(res, {
+    ganga: new GangaResponse(updatedGanga).buildGangaResponse(),
+  }).send();
 };
 
 const deleteGangaById = async (req, res) => {
   const { gangaId } = req.params;
   const deletedGanga = await GangaService.deleteGangaById({ gangaId });
-  res.send({ status: 'OK', data: deletedGanga });
+
+  new SuccessHttpResponse(res, {
+    ganga: new GangaResponse(deletedGanga).buildGangaResponse(),
+  }).send();
 };
 
 const createGangasFromCSV = async (req, res) => {
   const filePath = req.file.path;
   const gangas = await GangaService.createGangasFromCSV({ filePath });
-  res.send({ status: 'OK', data: gangas });
+
+  new CreatedHttpResponse(res, {
+    gangas: new GangaResponse(gangas).buildGangaResponse(),
+  }).send();
 };
 
 export default {

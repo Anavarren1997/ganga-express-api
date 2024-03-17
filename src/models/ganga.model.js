@@ -1,23 +1,14 @@
-import mysql from 'mysql2/promise';
-
-const connection = await mysql.createConnection({
-  host: 'localhost',
-  port: '3306',
-  user: 'sporttia',
-  password: 'sporttia',
-  database: 'gangaexpresss_dev',
-});
+import { dbPool } from '../app';
 
 const getAllGangas = async () => {
-  const [gangas] = await connection.query(`SELECT * from products`);
+  const [gangas] = await dbPool.query(`SELECT * from products`);
   return gangas;
 };
 
 const getGangaById = async ({ gangaId }) => {
-  const [gangas] = await connection.query(
-    `SELECT * from products WHERE id = ?;`,
-    [gangaId]
-  );
+  const [gangas] = await dbPool.query(`SELECT * from products WHERE id = ?;`, [
+    gangaId,
+  ]);
 
   if (gangas.length === 0) return null;
 
@@ -33,14 +24,14 @@ const createGanga = async ({
   amazonLink,
   palletId,
 }) => {
-  await connection.query(
+  await dbPool.query(
     `INSERT INTO products (name, description, real_price, buy_price, sale_price, amazon_link, pallet_id)
           VALUES (?, ?, ?, ?, ?, ?);`,
     [name, description, realPrice, buyPrice, salePrice, amazonLink, palletId]
   );
 
   // Obtener la fila recién insertada
-  const [gangas] = await connection.query(
+  const [gangas] = await dbPool.query(
     `SELECT * FROM products WHERE name = ? ORDER BY id DESC LIMIT 1`,
     [name]
   );
@@ -94,7 +85,7 @@ const updateGangaById = async ({
   queryParams.push(gangaId);
 
   // Actualiza solo los campos proporcionados
-  await connection.query(
+  await dbPool.query(
     `UPDATE products 
      SET ${updateFields.join(', ')}
      WHERE id = ?;`,
@@ -102,7 +93,7 @@ const updateGangaById = async ({
   );
 
   // Obtener la fila actualizada
-  const [updatedGanga] = await connection.query(
+  const [updatedGanga] = await dbPool.query(
     `SELECT * FROM products WHERE id = ?`,
     [gangaId]
   );
@@ -121,13 +112,13 @@ const deleteGangaById = async ({ gangaId }) => {
     .replace('T', ' ');
 
   // Elimina el producto
-  await connection.query(`UPDATE products SET deleted_at = ? WHERE id = ?;`, [
+  await dbPool.query(`UPDATE products SET deleted_at = ? WHERE id = ?;`, [
     formattedDate,
     gangaId,
   ]);
 
   // Obtener la fila eliminada
-  const [deletedGanga] = await connection.query(
+  const [deletedGanga] = await dbPool.query(
     `SELECT * FROM products WHERE id = ?`,
     [gangaId]
   );
@@ -149,14 +140,14 @@ const bulkCreateGangas = async ({ gangas }) => {
   ]);
 
   // Realiza la inserción masiva en la base de datos
-  await connection.query(
+  await dbPool.query(
     `INSERT INTO products (name, description, real_price, buy_price, sale_price, amazon_link, weight, pallet_id)
      VALUES ?`,
     [values]
   );
 
   // Obtener la fila recién insertada
-  const [createdGangas] = await connection.query(
+  const [createdGangas] = await dbPool.query(
     `SELECT * FROM products ORDER BY id DESC LIMIT ${values.length}`
   );
 

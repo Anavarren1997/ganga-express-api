@@ -1,23 +1,14 @@
-import mysql from 'mysql2/promise';
-
-const connection = await mysql.createConnection({
-  host: 'localhost',
-  port: '3306',
-  user: 'sporttia',
-  password: 'sporttia',
-  database: 'gangaexpresss_dev',
-});
+import { dbPool } from '../app';
 
 const getAllPallets = async () => {
-  const [pallets] = await connection.query(`SELECT * from pallets`);
+  const [pallets] = await dbPool.query(`SELECT * from pallets`);
   return pallets;
 };
 
 const getPalletById = async ({ palletId }) => {
-  const [pallets] = await connection.query(
-    `SELECT * from pallets WHERE id = ?;`,
-    [palletId]
-  );
+  const [pallets] = await dbPool.query(`SELECT * from pallets WHERE id = ?;`, [
+    palletId,
+  ]);
 
   if (pallets.length === 0) return null;
 
@@ -32,14 +23,14 @@ const createPallet = async ({
   shippingPrice,
   totalPaid,
 }) => {
-  await connection.query(
+  await dbPool.query(
     `INSERT INTO pallets (name, price_worth, cost_price, vat, shipping_expenses, total_paid)
           VALUES (?, ?, ?, ?, ?, ?);`,
     [name, priceWorth, costPrice, vat, shippingPrice, totalPaid]
   );
 
   // Obtener la fila recién insertada
-  const [pallets] = await connection.query(
+  const [pallets] = await dbPool.query(
     `SELECT * FROM pallets WHERE name = ? ORDER BY id DESC LIMIT 1`,
     [name]
   );
@@ -93,7 +84,7 @@ const updatePalletById = async ({
   queryParams.push(palletId);
 
   // Actualiza solo los campos proporcionados
-  await connection.query(
+  await dbPool.query(
     `UPDATE pallets 
      SET ${updateFields.join(', ')}
      WHERE id = ?;`,
@@ -101,7 +92,7 @@ const updatePalletById = async ({
   );
 
   // Obtener la fila actualizada
-  const [updatedPallet] = await connection.query(
+  const [updatedPallet] = await dbPool.query(
     `SELECT * FROM pallets WHERE id = ?`,
     [palletId]
   );
@@ -120,13 +111,13 @@ const deletePalletById = async ({ palletId }) => {
     .replace('T', ' ');
 
   // Elimina el producto
-  await connection.query(`UPDATE pallets SET deleted_at = ? WHERE id = ?;`, [
+  await dbPool.query(`UPDATE pallets SET deleted_at = ? WHERE id = ?;`, [
     formattedDate,
     palletId,
   ]);
 
   // Obtener la fila eliminada
-  const [deletedPallet] = await connection.query(
+  const [deletedPallet] = await dbPool.query(
     `SELECT * FROM pallets WHERE id = ?`,
     [palletId]
   );

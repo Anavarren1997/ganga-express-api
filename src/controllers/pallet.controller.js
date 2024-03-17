@@ -1,15 +1,24 @@
 import PalletService from '../services/pallet.service.js';
 import GangaService from '../services/ganga.service.js';
+import { SuccessHttpResponse } from '../utils/httpResponses/success.httpResponse.ts';
+import { CreatedHttpResponse } from '../utils/httpResponses/created.httpResponse.ts';
+import PalletResponse from '../responses/pallet.response.js';
+import GangaResponse from '../responses/ganga.response.js';
 
 const getAllPallets = async (req, res) => {
-  const Pallets = await PalletService.getAllPallets();
-  res.send({ status: 'OK', data: Pallets });
+  const pallets = await PalletService.getAllPallets();
+
+  new SuccessHttpResponse(res, {
+    pallets: new PalletResponse(pallets).buildPalletResponse(),
+  }).send();
 };
 
 const getPalletById = async (req, res) => {
   const { palletId } = req.params;
   const pallet = await PalletService.getPalletById({ palletId });
-  res.send({ status: 'OK', data: pallet });
+  new SuccessHttpResponse(res, {
+    pallet: new PalletResponse(pallet).buildPalletResponse(),
+  });
 };
 
 const createPallet = async (req, res) => {
@@ -21,7 +30,10 @@ const createPallet = async (req, res) => {
     vat,
     shippingPrice,
   });
-  res.send({ status: 'OK', data: newPallet });
+
+  new CreatedHttpResponse(res, {
+    pallet: new PalletResponse(newPallet).buildPalletResponse(),
+  });
 };
 
 const updatePalletById = async (req, res) => {
@@ -45,32 +57,44 @@ const updatePalletById = async (req, res) => {
     moneyReturn,
     totalPaid,
   });
-  res.send({ status: 'OK', data: updatedPallet });
+
+  new SuccessHttpResponse(res, {
+    pallet: new PalletResponse(updatedPallet).buildPalletResponse(),
+  });
 };
 
 const deletePalletById = async (req, res) => {
   const { palletId } = req.params;
   const deletedPallet = await PalletService.deletePalletById({ palletId });
-  res.send({ status: 'OK', data: deletedPallet });
+
+  new SuccessHttpResponse(res, {
+    pallet: new PalletResponse(deletedPallet).buildPalletResponse(),
+  });
 };
 
 const createGangaForPallet = async (req, res) => {
   const { palletId } = req.params;
   const { amazonUrl, realPrice, buyPrice } = req.body;
-  const newPallet = await GangaService.createGangaForPallet({
+  const newGanga = await GangaService.createGangaForPallet({
     palletId,
     amazonUrl,
     realPrice,
     buyPrice,
   });
-  res.send({ status: 'OK', data: newPallet });
+
+  new CreatedHttpResponse(res, {
+    ganga: new GangaResponse(newGanga).buildGangaResponse(),
+  }).send();
 };
 
 const createGangasFromCsvForPallet = async (req, res) => {
   const { palletId } = req.params;
   const filePath = req.file.path;
   const gangas = await GangaService.createGangasFromCSV({ filePath, palletId });
-  res.send({ status: 'OK', data: gangas });
+
+  new CreatedHttpResponse(res, {
+    gangas: new GangaResponse(gangas).buildGangaResponse(),
+  }).send();
 };
 
 export default {
