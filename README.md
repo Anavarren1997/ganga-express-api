@@ -1,6 +1,6 @@
 # TODOS
 
-[ok] Añadir carpeta src
+- [ok] Añadir carpeta src
 [ok] Instanciar Server y Database y crear las instancias en app.ts
 [ok] Instalar Typescript y hacerlo funcionar
 [30%] Mirgar todo a TS
